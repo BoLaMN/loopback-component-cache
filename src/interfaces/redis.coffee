@@ -22,9 +22,7 @@ class RedisInterface extends EventEmitter
       @emit 'ready'
 
   redisConnect: (clientName, cb) =>
-    { port, host, auth } = @options
-
-    @[clientName] = redis.createClient port or 6379, host or '127.0.0.1', { auth_pass: auth }
+    @[clientName] = redis.createClient @options
 
     @[clientName].on "error", (err) -> console.warn "#{ err }"
     @[clientName].on "ready", cb

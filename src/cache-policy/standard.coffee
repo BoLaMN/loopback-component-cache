@@ -10,10 +10,10 @@ class StandardCachePolicy extends CachePolicy
 
     @ttl = @options.ttl or 30
 
-  get: (context, callback) ->
-    debug 'get: %s', context.keyCache
+  get: (key, callback) ->
+    debug 'get: %s', key
 
-    fullKey = @key context.keyCache
+    fullKey = @key key
 
     get = (datastore, done) =>
       datastore.get fullKey, (err, result) =>
@@ -33,22 +33,8 @@ class StandardCachePolicy extends CachePolicy
 
           done null, decompressedResult
 
-    get @datastores[0], (err, data) ->
-      if err
-        return callback err
+    get @datastores[0], callback
 
-      cached = context.cached = ! !data
-
-      if not cached
-        return callback()
-
-      context.result = data
-
-      context.done (err) ->
-        if err
-          callback err
-
-      return
     return
 
   set: (key, result, callback) ->

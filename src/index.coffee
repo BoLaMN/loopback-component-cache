@@ -13,10 +13,11 @@ module.exports = (app, options = {}) ->
         type: 'memory'
     policy:
       type: 'standard'
-      ttl: 30 # seconds
+      ttl: 300 # seconds
+      prefix: 'cache'
     interface:
       type: 'redis'
-    prefix: ''
+      host: app.get 'REDIS_HOST'
   , options
 
   app.cache = new Cache options

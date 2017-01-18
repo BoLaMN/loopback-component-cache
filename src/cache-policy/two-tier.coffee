@@ -14,10 +14,8 @@ class TwoTierCachePolicy extends CachePolicy
     @refetch = 0.5 * 1000
     @ttl = [ 30, 60 ] or @options.ttl
 
-  get: (context, callback) ->
-    debug 'get: %s', context.keyCache
-
-    key = context.keyCache
+  get: (key, callback) ->
+    debug 'get: %s', key
 
     hkey = @key key + ':h'
     ckey = @key key + ':c'
@@ -43,38 +41,28 @@ class TwoTierCachePolicy extends CachePolicy
 
       debug 'cache-hit-cool: %s', ckey
 
-      finish = (done) ->
-        (err, data) ->
-          context.result = data
-
-          done (err) ->
-            if err
-              debug err
-
-      context.raceTimeout = setTimeout =>
+      raceTimeout = setTimeout =>
         debug 'cache-hit-cool: %s timeout on backend', ckey
-        done = finish context.done
-        context.done = null
-        @decode coolResult, done
+        c = callback
+        callback = null
+        @decode coolResult, c
       , @refetch
 
-      @callbacks[context.keyCache] = (result) =>
-        if not context.done
+      @callbacks[key] = (result) =>
+        if not callback
           return
 
-        done = finish context.done
-        context.done = null
+        c = callback
+        callback = null
 
-        clearTimeout context.raceTimeout
+        clearTimeout craceTimeout
 
         if err
           @cache.emit 'fetchError', err
-          return @decode coolResult, done
+          return @decode coolResult, c
 
         debug 'cache-hit-cool: %s retrieved from backend', ckey
-        done null, result
-
-      callback()
+        c null, result
 
       return
     return

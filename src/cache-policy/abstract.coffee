@@ -4,6 +4,9 @@ debug = require('debug')('loopback:cache:abstract')
 async = require 'async'
 
 class CachePolicy
+  constructor: (@options = {}) ->
+    @prefix = @options.prefix or 'cache'
+
   key: (key) ->
     @prefix + ':' + key
 
